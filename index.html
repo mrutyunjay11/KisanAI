@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🌾 KisanAI — Smart Farmer Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+:root{
+  --green:#2e7d32;--green-dark:#1b5e20;--green-light:#e8f5e9;
+  --amber:#ffb300;--amber-light:#fff8e1;
+  --brown:#8d6e63;--brown-dark:#5d4037;
+  --bg:#f4f6f0;--card:#fff;--border:#e2e8f0;
+  --text:#2c3e50;--muted:#7f8c8d;--white:#fff;
+  --sh-sm:0 1px 4px rgba(46,125,50,.08);
+  --sh-md:0 4px 16px rgba(46,125,50,.12);
+  --sh-lg:0 10px 30px rgba(46,125,50,.15);
+  --r:12px;--r-lg:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:var(--bg);color:var(--text);line-height:1.55;height:100vh;overflow:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#c3d4c5;border-radius:4px}
+
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100vh;max-width:1340px;margin:0 auto;background:var(--card);box-shadow:var(--sh-lg)}
+
+/* ── HEADER ── */
+header{
+  background:linear-gradient(135deg,var(--green-dark),var(--green));
+  color:#fff;padding:12px 22px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:3px solid var(--amber);flex-shrink:0;box-shadow:var(--sh-md)
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{
+  font-size:24px;background:rgba(255,255,255,.2);width:46px;height:46px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.3);animation:float 3s ease-in-out infinite
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.logo h1{font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;letter-spacing:.3px;line-height:1.2}
+.logo span{font-size:10px;opacity:.85;letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.api-badge{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  display:flex;align-items:center;gap:6px;cursor:default
+}
+.api-badge.on{background:rgba(255,235,59,.15);border-color:rgba(255,235,59,.4);color:#ffee58}
+.api-badge.partial{background:rgba(100,220,130,.15);border-color:rgba(100,220,130,.4);color:#b2ffce}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+/* pulse glow on gear when no key */
+.icon-btn.pulse-glow{animation:pulseGlow 2s ease-in-out infinite;background:rgba(255,235,59,.25);border:1px solid rgba(255,235,59,.5)}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,235,59,.5)}60%{box-shadow:0 0 0 8px rgba(255,235,59,.0)}}
+
+/* API key banner */
+.api-banner{
+  margin:12px 16px 0;border-radius:var(--r);overflow:hidden;
+  background:linear-gradient(135deg,#fff8e1,#fff3cd);
+  border:1.5px solid #ffca28;box-shadow:0 2px 10px rgba(255,202,40,.2)
+}
+.api-banner-hdr{
+  background:linear-gradient(135deg,#ff8f00,#f9a825);
+  color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px
+}
+.api-banner-hdr h4{font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;flex:1}
+.api-banner-hdr span{font-size:11px;opacity:.9}
+.dismiss-banner{background:rgba(255,255,255,.25);border:none;color:#fff;cursor:pointer;border-radius:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.dismiss-banner:hover{background:rgba(255,255,255,.4)}
+.api-banner-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.api-banner-body{grid-template-columns:1fr}}
+.key-field{display:flex;flex-direction:column;gap:5px}
+.key-field label{font-size:11px;font-weight:700;color:#6d4c00;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:5px}
+.key-inp-wrap{display:flex;gap:4px}
+.key-inp-wrap input{
+  flex:1;padding:9px 12px;border:1.5px solid #ffe082;border-radius:8px;
+  font-size:13px;outline:none;background:#fff;min-width:0
+}
+.key-inp-wrap input:focus{border-color:#f9a825;box-shadow:0 0 0 3px rgba(249,168,37,.15)}
+.eye-btn,.test-btn{
+  background:#fff;border:1.5px solid #ffe082;border-radius:8px;
+  padding:0 10px;cursor:pointer;font-size:12px;white-space:nowrap;
+  display:flex;align-items:center;gap:4px;transition:.15s;color:#6d4c00
+}
+.eye-btn:hover,.test-btn:hover{background:#fff3cd;border-color:#f9a825}
+.test-btn{padding:0 10px;font-weight:700;color:#2e7d32;border-color:#c8e6c9;background:#f1f8f0}
+.test-btn:hover{background:#c8e6c9}
+.api-banner-foot{
+  padding:0 16px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap
+}
+.api-banner-foot p{font-size:11px;color:#6d4c00;opacity:.8}
+.apply-keys-btn{
+  padding:9px 20px;background:linear-gradient(135deg,#2e7d32,#1b5e20);
+  color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 3px 8px rgba(46,125,50,.25);transition:.15s
+}
+.apply-keys-btn:hover{opacity:.92;transform:translateY(-1px)}
+.key-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-top:2px;display:inline-block}
+.key-status.ok{background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9}
+.key-status.err{background:#ffebee;color:#c62828;border:1px solid #ffcdd2}
+.key-status.checking{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.icon-btn{
+  background:rgba(255,255,255,.15);border:none;color:#fff;cursor:pointer;
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;transition:.2s;font-size:14px
+}
+.icon-btn:hover{background:rgba(255,255,255,.28);transform:rotate(30deg)}
+
+/* ── MAIN ── */
+.main{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* ── SETUP SCREEN ── */
+#setup-screen{
+  position:absolute;inset:0;z-index:20;
+  background:radial-gradient(circle at top right,#f1f8f3,var(--bg));
+  display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto
+}
+.setup-card{
+  background:#fff;border-radius:var(--r-lg);padding:36px;width:100%;max-width:480px;
+  box-shadow:var(--sh-lg);border:1px solid var(--border)
+}
+.setup-card .mascot{text-align:center;font-size:52px;margin-bottom:12px}
+.setup-card h2{font-family:'Outfit',sans-serif;text-align:center;font-size:26px;font-weight:800;color:var(--green-dark);margin-bottom:6px}
+.setup-card p{text-align:center;color:var(--muted);font-size:14px;margin-bottom:28px}
+.fg{margin-bottom:18px}
+.fg label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:#4a5568;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select{
+  width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--r);
+  font-size:14px;outline:none;transition:.2s;background:#fcfdfc
+}
+.fg input:focus,.fg select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(46,125,50,.15);background:#fff}
+.btn-primary{
+  width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--green-dark));
+  border:none;color:#fff;border-radius:var(--r);font-size:16px;font-weight:700;
+  cursor:pointer;display:flex;justify-content:center;align-items:center;gap:8px;
+  transition:.2s;box-shadow:0 4px 12px rgba(46,125,50,.25);margin-top:6px
+}
+.btn-primary:hover{opacity:.93;transform:translateY(-1px)}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:300px;background:#f8faf7;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto
+}
+.sb-sec{padding:18px 16px;border-bottom:1px solid var(--border)}
+.sb-sec h3{
+  font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--green-dark);
+  margin-bottom:14px;display:flex;align-items:center;gap:7px;
+  text-transform:uppercase;letter-spacing:.6px
+}
+.profile-card{background:#fff;border-radius:var(--r);padding:14px;box-shadow:var(--sh-sm);border:1px solid #edf2f7}
+.pr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed #edf2f7;font-size:13px}
+.pr:last-child{border-bottom:none}
+.pr-lbl{color:var(--muted);font-weight:500}.pr-val{font-weight:700;color:var(--text)}
+.edit-btn{
+  width:100%;margin-top:10px;padding:7px;background:transparent;border:1px solid var(--green);
+  color:var(--green);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+  display:flex;justify-content:center;align-items:center;gap:5px;transition:.2s
+}
+.edit-btn:hover{background:var(--green-light)}
+.stat-pill{
+  background:linear-gradient(135deg,var(--green-light),#e0f2e1);
+  border:1px solid #c8e6c9;border-radius:var(--r);padding:14px;
+  display:flex;align-items:center;gap:14px
+}
+.stat-icon{font-size:22px;color:var(--green-dark);background:rgba(255,255,255,.7);width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:9px}
+.stat-num{font-size:22px;font-weight:800;color:var(--green-dark);line-height:1}
+.stat-lbl{font-size:11px;color:#388e3c;font-weight:600;margin-top:2px}
+.hist-list{display:flex;flex-direction:column;gap:6px}
+.hist-item{
+  background:#fff;border:1px solid #edf2f7;padding:9px 12px;border-radius:8px;
+  font-size:12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:.2s;display:flex;align-items:center;gap:7px
+}
+.hist-item:hover{border-color:var(--green);background:var(--green-light);transform:translateX(2px)}
+.sb-bottom{padding:10px 16px}
+.reset-btn{
+  width:100%;padding:8px;background:#fff5f5;color:#e53e3e;border:1px solid #fed7d7;
+  border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;
+  display:flex;justify-content:center;align-items:center;gap:5px;transition:.2s
+}
+.reset-btn:hover{background:#fee2e2}
+
+/* ── CHAT PANEL ── */
+.chat-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.chat-msgs{
+  flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;
+  background:#fafbfc;
+  background-image:radial-gradient(rgba(46,125,50,.07) 1px,transparent 1px);
+  background-size:20px 20px
+}
+.msg-row{display:flex;gap:10px;max-width:78%}
+.msg-row.user{align-self:flex-end;flex-direction:row-reverse}
+.msg-row.ai{align-self:flex-start}
+.avatar{
+  width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:15px;flex-shrink:0;box-shadow:var(--sh-sm);
+  border:1px solid var(--border)
+}
+.msg-row.user .avatar{background:var(--amber-light);color:var(--brown-dark);border-color:#ffe082}
+.msg-row.ai .avatar{background:var(--green-light);color:var(--green-dark);border-color:#c8e6c9}
+.bubble{
+  padding:11px 16px;border-radius:var(--r);box-shadow:var(--sh-sm);font-size:14px;line-height:1.55
+}
+.msg-row.user .bubble{background:var(--green);color:#fff;border-top-right-radius:2px}
+.msg-row.ai .bubble{background:#fff;color:var(--text);border-top-left-radius:2px;border:1px solid #edf2f7}
+.badge{
+  display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;
+  text-transform:uppercase;padding:2px 7px;border-radius:5px;margin-top:7px;letter-spacing:.4px;
+  border:1px solid #e2e8f0;background:#f7fafc;color:var(--muted)
+}
+.badge.weather{background:#ebf8ff;border-color:#bee3f8;color:#2b6cb0}
+.badge.crop_price{background:#feebc8;border-color:#fbd38d;color:#dd6b20}
+.badge.govt_schemes{background:#e2f9e5;border-color:#c6f6d5;color:#2f855a}
+.badge.pest_advisor{background:#faf5ff;border-color:#e9d8fd;color:#6b46c1}
+.badge.safety_guardrail{background:#fff5f5;border-color:#fed7d7;color:#c53030}
+.badge.gemini_only{background:#f0f4ff;border-color:#d2e3fc;color:#1a73e8}
+.badge.simulated{background:#fffbf0;border-color:#fde68a;color:#92400e}
+
+/* Markdown rendering inside chat bubble */
+.bubble p {
+  margin-bottom: 8px;
+}
+.bubble p:last-child {
+  margin-bottom: 0;
+}
+.bubble ul, .bubble ol {
+  margin-left: 20px;
+  margin-bottom: 8px;
+}
+.bubble li {
+  margin-bottom: 4px;
+}
+.bubble h1, .bubble h2, .bubble h3, .bubble h4 {
+  font-family: 'Outfit', sans-serif;
+  color: var(--green-dark);
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.bubble h3 {
+  font-size: 16px;
+}
+.bubble h4 {
+  font-size: 14px;
+}
+.bubble table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 13px;
+}
+.bubble th, .bubble td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+}
+.bubble th {
+  background-color: var(--green-light);
+  color: var(--green-dark);
+  font-weight: 700;
+}
+.bubble tr:nth-child(even) {
+  background-color: #fcfdfc;
+}
+/* Suggestion buttons at bottom of bubble */
+.msg-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
+}
+.sug-chip {
+  background: var(--green-light);
+  border: 1px solid #c8e6c9;
+  color: var(--green-dark);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--sh-sm);
+}
+.sug-chip:hover {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+  transform: translateY(-1px);
+}
+
+/* typing */
+.typing-row{display:flex;gap:10px;align-self:flex-start}
+.typing-bubble{
+  background:#fff;border:1px solid #edf2f7;padding:10px 16px;border-radius:var(--r);
+  border-top-left-radius:2px;box-shadow:var(--sh-sm);display:flex;align-items:center;gap:8px
+}
+.typing-lbl{font-size:12px;color:var(--muted);font-weight:500}
+.dots{display:flex;gap:3px}
+.dots span{
+  width:7px;height:7px;background:var(--green);border-radius:50%;
+  animation:bounce 1.3s infinite ease-in-out both
+}
+.dots span:nth-child(1){animation-delay:-.32s}
+.dots span:nth-child(2){animation-delay:-.16s}
+@keyframes bounce{0%,80%,100%{transform:scale(.3)}40%{transform:scale(1)}}
+
+/* quick btns */
+.quick-area{
+  padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;
+  background:#fafbfc;border-top:1px solid var(--border);flex-shrink:0
+}
+.q-btn{
+  background:#fff;border:1px solid var(--border);padding:7px 14px;border-radius:20px;
+  font-size:12px;font-weight:600;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;gap:5px;transition:.2s;box-shadow:var(--sh-sm)
+}
+.q-btn:hover{border-color:var(--green);background:var(--green-light);color:var(--green-dark);transform:translateY(-1px)}
+.q-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.q-btn .spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* input */
+.input-area{padding:14px 20px 20px;background:#fff;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
+.input-wrap{flex:1;position:relative}
+.chat-input{
+  width:100%;padding:13px 18px;border:1.5px solid var(--border);border-radius:24px;
+  font-size:14px;outline:none;transition:.2s;background:#fff
+}
+.chat-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(46,125,50,.12)}
+.chat-input:disabled{background:#f7f9f7}
+.send-btn{
+  background:linear-gradient(135deg,var(--green),var(--green-dark));
+  border:none;color:#fff;cursor:pointer;width:46px;height:46px;border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+  box-shadow:0 4px 10px rgba(46,125,50,.25);flex-shrink:0;font-size:15px
+}
+.send-btn:hover:not(:disabled){opacity:.92;transform:translateY(-1px)}
+.send-btn:disabled{background:#cbd5e0;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* analytics */
+.analytics{
+  background:#fafbfc;border-top:1px solid var(--border);
+  padding:14px 22px;display:flex;gap:24px;flex-shrink:0;align-items:center
+}
+.an-title h3{font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;color:var(--green-dark);display:flex;align-items:center;gap:5px;margin-bottom:2px}
+.an-title p{font-size:11px;color:var(--muted)}
+.an-total{background:#fff;border:1px solid var(--border);padding:10px 16px;border-radius:var(--r);text-align:center;box-shadow:var(--sh-sm)}
+.an-total h4{font-size:20px;font-weight:800;color:var(--green-dark);line-height:1}
+.an-total p{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;font-weight:700;letter-spacing:.5px}
+.an-bars{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.an-bar-item{display:flex;flex-direction:column;gap:4px}
+.an-bar-hdr{display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:700}
+.an-bar-track{background:#edf2f7;height:6px;border-radius:4px;overflow:hidden}
+.an-bar-fill{height:100%;background:linear-gradient(90deg,#81c784,var(--green));border-radius:4px;transition:width .6s}
+
+/* modal */
+.modal-bg{
+  position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:30;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  backdrop-filter:blur(4px)
+}
+.modal{background:#fff;border-radius:var(--r-lg);padding:28px;width:100%;max-width:460px;box-shadow:var(--sh-lg);border:1px solid var(--border)}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-hdr h3{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--green-dark)}
+.close-btn{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer}
+.close-btn:hover{color:var(--text)}
+.info-box{background:var(--amber-light);border:1px solid #ffe082;border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--brown-dark);margin-bottom:16px;display:flex;gap:9px}
+.save-btn{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:.2s}
+.save-btn:hover{background:var(--green-dark)}
+
+/* hidden */
+.hidden{display:none!important}
+
+/* responsive */
+@media(max-width:860px){
+  .sidebar{width:100%;height:auto;max-height:220px;border-right:none;border-bottom:1px solid var(--border)}
+  .sb-sec.hist-sec{display:none}
+  .analytics{flex-direction:column;gap:10px}
+  .an-bars{grid-template-columns:1fr;gap:6px}
+  .main{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🌾</div>
+      <div>
+        <h1>KisanAI</h1>
+        <span>Jai Kisan — Smart Farming Assistant</span>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="api-badge" id="api-status">
+        <i class="fa-solid fa-circle-dot"></i> Simulation Mode
+      </div>
+      <button class="icon-btn" id="settings-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
+    </div>
+  </header>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+
+    <!-- SETUP SCREEN -->
+    <div id="setup-screen">
+      <div class="setup-card">
+        <div class="mascot">🚜</div>
+        <h2>Welcome to KisanAI</h2>
+        <p>Tell me about yourself so I can give you personalized farming guidance.</p>
+        <div class="fg">
+          <label>Your Name</label>
+          <input type="text" id="inp-name" placeholder="e.g. Rameshbhai Patel" autocomplete="off"/>
+        </div>
+        <div class="fg">
+          <label>Your Location / City</label>
+          <input type="text" id="inp-loc" value="Rajkot" autocomplete="off"/>
+        </div>
+        <div class="fg">
+          <label>Primary Crop</label>
+          <select id="inp-crop">
+            <option value="Cotton">Cotton (कपास)</option>
+            <option value="Groundnut">Groundnut (मूंगफली)</option>
+            <option value="Wheat">Wheat (गेहूं)</option>
+            <option value="Rice">Rice (धान)</option>
+            <option value="Cumin">Cumin (जीरा)</option>
+            <option value="Bajra">Bajra (बाजरा)</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="start-btn">
+          Start KisanAI &nbsp;<i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-sec">
+        <h3><i class="fa-solid fa-address-card"></i> Farmer Profile</h3>
+        <div class="profile-card">
+          <div class="pr"><span class="pr-lbl">Name</span><span class="pr-val" id="sb-name">—</span></div>
+          <div class="pr"><span class="pr-lbl">Location</span><span class="pr-val" id="sb-loc">—</span></div>
+          <div class="pr"><span class="pr-lbl">Crop</span><span class="pr-val" id="sb-crop">—</span></div>
+        </div>
+        <button class="edit-btn" id="edit-btn"><i class="fa-solid fa-pen"></i> Edit Profile</button>
+      </div>
+      <div class="sb-sec">
+        <h3><i class="fa-solid fa-chart-line"></i> Engagement</h3>
+        <div class="stat-pill">
+          <div class="stat-icon"><i class="fa-solid fa-comments"></i></div>
+          <div><div class="stat-num" id="sb-total">0</div><div class="stat-lbl">Questions Asked</div></div>
+        </div>
+      </div>
+      <div class="sb-sec hist-sec" style="flex:1">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> Last 5 Questions</h3>
+        <div class="hist-list" id="hist-list"><div style="font-size:12px;color:var(--muted);text-align:center;padding:10px">No questions yet</div></div>
+      </div>
+      <div class="sb-bottom">
+        <button class="reset-btn" id="reset-btn"><i class="fa-solid fa-rotate-left"></i> Reset Session</button>
+      </div>
+    </div>
+
+    <!-- CHAT PANEL -->
+    <div class="chat-panel">
+      <div class="chat-msgs" id="chat-msgs"></div>
+
+      <!-- API Key Setup Banner (shown when no keys set) -->
+      <div class="api-banner" id="api-banner">
+        <div class="api-banner-hdr">
+          <i class="fa-solid fa-key" style="font-size:16px"></i>
+          <h4>🔑 Enter Your Gemini API Key — Enable Live AI!</h4>
+          <span>Weather and live search are enabled once key is set ✅</span>
+          <button class="dismiss-banner" id="dismiss-banner" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="api-banner-body" style="grid-template-columns: 1fr;">
+          <div class="key-field">
+            <label><i class="fa-solid fa-robot"></i> Gemini API Key
+              <a href="https://aistudio.google.com" target="_blank" style="font-weight:400;color:#f9a825;font-size:10px">→ Get free</a>
+            </label>
+            <div class="key-inp-wrap">
+              <input type="password" id="banner-gemini-key" placeholder="AIzaSy…" autocomplete="off"/>
+              <button class="eye-btn" onclick="toggleEye('banner-gemini-key',this)" title="Show/hide"><i class="fa-solid fa-eye"></i></button>
+              <button class="test-btn" id="test-gemini-btn" onclick="testGeminiKey()"><i class="fa-solid fa-plug"></i> Test</button>
+            </div>
+            <span class="key-status" id="gemini-status" style="display:none"></span>
+          </div>
+        </div>
+        <div class="api-banner-foot">
+          <p>🔒 Key stored only in your browser — never sent to any server except the API above.</p>
+          <button class="apply-keys-btn" onclick="applyBannerKeys()">
+            <i class="fa-solid fa-bolt"></i> Apply &amp; Go Live!
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick buttons -->
+      <div class="quick-area" id="quick-area">
+        <button class="q-btn" data-q="weather"><i class="fa-solid fa-cloud-sun"></i> Weather today?</button>
+        <button class="q-btn" data-q="price"><i class="fa-solid fa-indian-rupee-sign"></i> Mandi price?</button>
+        <button class="q-btn" data-q="schemes"><i class="fa-solid fa-landmark"></i> Govt schemes?</button>
+        <button class="q-btn" data-q="pest"><i class="fa-solid fa-bug"></i> Pest problem</button>
+      </div>
+
+      <!-- Input -->
+      <div class="input-area">
+        <div class="input-wrap">
+          <input type="text" class="chat-input" id="chat-input" placeholder="Type your farming question here…" autocomplete="off"/>
+        </div>
+        <button class="send-btn" id="send-btn" disabled><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+
+      <!-- Analytics -->
+      <div class="analytics">
+        <div class="an-title">
+          <h3><i class="fa-solid fa-chart-pie"></i> Tool Analytics</h3>
+          <p>Live observability</p>
+        </div>
+        <div class="an-total"><h4 id="an-total">0</h4><p>Total</p></div>
+        <div class="an-bars" id="an-bars"></div>
+      </div>
+    </div>
+
+  </div><!-- .main -->
+
+  <!-- SETTINGS MODAL (hidden) -->
+  <div class="modal-bg hidden" id="modal">
+    <div class="modal">
+      <div class="modal-hdr">
+        <h3>⚙️ KisanAI Settings</h3>
+        <button class="close-btn" id="close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="info-box"><i class="fa-solid fa-circle-info" style="color:var(--amber);font-size:16px;margin-top:2px"></i>
+        <div>Enter your Gemini API key below to enable <b>live AI responses</b> and <b>real mandi prices</b>. Key is saved in your browser only.</div>
+      </div>
+      <div class="fg">
+        <label>🤖 Gemini API Key <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(from <a href="https://aistudio.google.com" target="_blank" style="color:var(--green)">aistudio.google.com</a>)</span></label>
+        <input type="password" id="api-key-inp" placeholder="AIzaSy…"/>
+      </div>
+      <div class="fg">
+        <label>🌾 Gemini Model</label>
+        <select id="model-sel">
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
+          <option value="gemini-3.5-flash">Gemini 3.5 Flash (Latest)</option>
+          <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+          <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+        </select>
+      </div>
+      <button class="save-btn" id="save-api-btn">💾 Save & Apply Settings</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+/* ══════════════════════════════════════════════
+   KisanAI — Pure Vanilla JS (No React, No Babel)
+══════════════════════════════════════════════ */
+
+// ── STATE ────────────────────────────────────
+const S = {
+  name:'', loc:'Rajkot', crop:'Cotton',
+  apiKey: localStorage.getItem('kai_apikey') || '',
+  model:  localStorage.getItem('kai_model')  || 'gemini-2.5-flash',
+  msgs: [],          // {role:'user'|'ai', html, badge, badgeText}
+  history: [],       // last 5 question strings
+  analytics: JSON.parse(localStorage.getItem('kai_analytics')||'{"total":0,"weather":0,"crop_price":0,"govt_schemes":0,"pest_advisor":0,"safety_guardrail":0,"gemini_only":0}'),
+  loading: false,
+  fetchingWeather: false,
+  fetchingPrice: false
+};
+
+// ── MOCK DATA ────────────────────────────────
+const MOCK = {
+  weather: {
+    Rajkot: '34°C, Partly Cloudy ⛅, Humidity 65%, Wind 4.2 km/h. No heavy rain expected today.',
+    default: '31°C, Sunny ☀️, Humidity 58%, Wind 3.5 km/h. Good weather for field work.'
+  },
+  prices: {
+    Cotton:    '₹6,500/quintal — Trend ↑ Rising (strong mill demand)',
+    Groundnut: '₹5,800/quintal — Trend → Stable',
+    Wheat:     '₹2,200/quintal — Trend ↓ Falling (fresh arrivals)',
+    Rice:      '₹3,500/quintal — Trend ↑ Rising',
+    Cumin:     '₹22,000/quintal — Trend ↑ Very High Demand',
+    Bajra:     '₹2,100/quintal — Trend → Stable',
+    default:   '₹2,500/quintal — Trend → Stable'
+  },
+  schemes: [
+    {name:'PM Krishi Sinchayee Yojana (PMKSY)',benefit:'55% subsidy on drip/sprinkler irrigation.',apply:'PMKSY portal or district Agriculture Office.'},
+    {name:'PM-KUSUM Scheme (Component B)',benefit:'60% subsidy on solar water pumps.',apply:'State renewable energy agency website.'},
+    {name:'PM-KISAN Yojana',benefit:'₹6,000/year direct income support (3 installments).',apply:'PM-KISAN portal or local CSC centre.'},
+    {name:'Pradhan Mantri Fasal Bima Yojana',benefit:'Crop insurance at very low premium for losses due to weather.',apply:'Nearest bank or insurance company before crop season.'}
+  ],
+  pest: {
+    Cotton:    ['Check for aphids, thrips, whiteflies on leaf underside.','Spray neem oil (5ml/litre) as organic control.','If leaves yellow — may be nitrogen deficiency; apply urea lightly.','Avoid waterlogging; maintain field drainage.'],
+    Groundnut: ['Look for Tikka leaf spots or rust.','Spray Mancozeb if spots spread rapidly.','Rotate crops to prevent soil-borne disease.','Avoid over-watering during vegetative phase.'],
+    Wheat:     ['Check for yellow rust on leaves.','Apply Propiconazole spray if rust spots appear.','Irrigate at crown-root initiation and flowering stages.','Watch for aphids in late winter.'],
+    Rice:      ['Monitor for Blast disease or Stem Borer.','Use Carbendazim for blast; avoid excess nitrogen.','Keep 2-5 cm standing water during vegetative stage.','Drain field 2 weeks before harvest.'],
+    Cumin:     ['Watch for Powdery Mildew or Cumin Wilt.','Spray soluble sulphur for mildew control.','Cumin needs dry climate — avoid excess water.','Weed regularly to reduce moisture retention.'],
+    Bajra:     ['Check for Downy Mildew or Ergot disease.','Use certified clean seeds to prevent ergot.','Thin seedlings to proper plant density.','Apply nitrogen in split doses.'],
+    default:   ['Inspect underside of leaves for insects or fungal growth.','Remove infected plant parts immediately.','Ensure balanced NPK fertilization per soil test.','Consult your local Krishi Sevak if problem persists.']
+  }
+};
+
+// ── DOM HELPERS ──────────────────────────────
+const $  = id => document.getElementById(id);
+const el = (tag, attrs={}, inner='') => {
+  const e = document.createElement(tag);
+  Object.assign(e, attrs);
+  if(inner) e.innerHTML = inner;
+  return e;
+};
+
+// ── RENDER ANALYTICS ─────────────────────────
+const TOOLS = [
+  {key:'weather',   label:'Weather',    icon:'fa-cloud'},
+  {key:'crop_price',label:'Mandi Price',icon:'fa-indian-rupee-sign'},
+  {key:'govt_schemes',label:'Gov Schemes',icon:'fa-landmark'},
+  {key:'pest_advisor',label:'Pest Advisor',icon:'fa-bug'},
+  {key:'safety_guardrail',label:'Safety',icon:'fa-shield-halved'}
+];
+function renderAnalytics(){
+  $('an-total').textContent = S.analytics.total;
+  $('sb-total').textContent  = S.analytics.total;
+  const bars = $('an-bars');
+  bars.innerHTML = '';
+  const total = S.analytics.total || 1;
+  TOOLS.forEach(t => {
+    const cnt = S.analytics[t.key]||0;
+    const pct = Math.round((cnt/total)*100);
+    bars.innerHTML += `<div class="an-bar-item">
+      <div class="an-bar-hdr">
+        <span style="display:flex;align-items:center;gap:4px;font-size:10px"><i class="fa-solid ${t.icon}" style="opacity:.6"></i>${t.label}</span>
+        <span style="color:var(--green);font-weight:800">${cnt}</span>
+      </div>
+      <div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+}
+
+// ── RENDER HISTORY ───────────────────────────
+function renderHistory(){
+  const list = $('hist-list');
+  if(!S.history.length){ list.innerHTML='<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px">No questions yet</div>'; return; }
+  list.innerHTML = '';
+  S.history.forEach(q => {
+    const d = el('div',{className:'hist-item',title:'Click to ask again',onclick:()=>sendMsg(q)});
+    d.innerHTML = `<i class="fa-solid fa-reply" style="opacity:.4;font-size:10px"></i>${escHtml(q)}`;
+    list.appendChild(d);
+  });
+}
+
+// ── CHAT RENDERING ───────────────────────────
+// ── MARKDOWN & SUGGESTION PARSING ───────────────────
+function extractSuggestions(txt) {
+  const suggestions = [];
+  const variations = [
+    /\[Suggest:\s*(.*?)\]/gi,
+    /\[Button:\s*(.*?)\]/gi,
+    /\[Option:\s*(.*?)\]/gi
+  ];
+  let cleanText = txt;
+  for (const r of variations) {
+    cleanText = cleanText.replace(r, (match, p1) => {
+      const s = p1.trim();
+      if (s && !suggestions.includes(s)) {
+        suggestions.push(s);
+      }
+      return '';
+    });
+  }
+  return { cleanText: cleanText.trim(), suggestions };
+}
+
+function mdToHtml(md) {
+  if (window.marked && typeof window.marked.parse === 'function') {
+    return window.marked.parse(md);
+  }
+  // Fallback simple markdown parser
+  return md
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.*?)\*/g, '<i>$1</i>')
+    .replace(/\n/g, '<br/>');
+}
+
+function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+function addMsg(role, htmlContent, badge='', badgeText='', suggestions=[]){
+  S.msgs.push({role, htmlContent, badge, badgeText, suggestions});
+  renderMessages();
+}
+
+function renderMessages(){
+  const box = $('chat-msgs');
+  box.innerHTML = '';
+  S.msgs.forEach(m => {
+    const row = el('div',{className:`msg-row ${m.role}`});
+    const av  = el('div',{className:'avatar', innerHTML: m.role==='user'
+      ? '<i class="fa-solid fa-user-tag"></i>'
+      : '<i class="fa-solid fa-wheat-awn"></i>'});
+    const bub = el('div',{className:'bubble'});
+    
+    // Create a body wrapper for the html content
+    const body = el('div', {innerHTML: m.htmlContent});
+    bub.appendChild(body);
+    
+    if(m.role==='ai' && m.badge){
+      bub.appendChild(el('div', {}, `<span><span class="badge ${m.badge}">${escHtml(m.badgeText)}</span></span>`));
+    }
+    
+    // Append suggestions if present
+    if(m.role==='ai' && m.suggestions && m.suggestions.length > 0){
+      const sugDiv = el('div', {className: 'msg-suggestions'});
+      m.suggestions.forEach(s => {
+        const btn = el('button', {
+          className: 'sug-chip',
+          textContent: s,
+          onclick: () => sendMsg(s)
+        });
+        sugDiv.appendChild(btn);
+      });
+      bub.appendChild(sugDiv);
+    }
+    
+    row.appendChild(av); row.appendChild(bub);
+    box.appendChild(row);
+  });
+  if(S.loading){
+    const trow = el('div',{className:'typing-row'});
+    trow.innerHTML = `
+      <div class="avatar"><i class="fa-solid fa-wheat-awn"></i></div>
+      <div class="typing-bubble">
+        <span class="typing-lbl">${S.fetchingWeather?'Fetching live weather…':S.fetchingPrice?'Fetching mandi rates…':'Thinking…'}</span>
+        <div class="dots"><span></span><span></span><span></span></div>
+      </div>`;
+    box.appendChild(trow);
+  }
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── SAFETY CHECK ─────────────────────────────
+function safetyCheck(q){
+  const l = q.toLowerCase();
+  const expertKW = ['exact dose','how much pesticide','chemical formula','inject','loan fraud','illegal'];
+  const medKW    = ['sick','hospital','medicine','disease in human','human disease',' ill ','doctor'];
+  if(expertKW.some(k=>l.includes(k))) return '⚠️ For exact chemical or pesticide doses, please consult your local Krishi Sevak (Agriculture Officer). Safety first!';
+  if(medKW.some(k=>l.includes(k)))    return '⚠️ For human health issues, please consult a doctor. I can only help with farming questions.';
+  return null;
+}
+
+// ── LIVE WEATHER ─────────────────────────────
+// ── FETCH WITH TIMEOUT ───────────────────────
+async function fetchWithTimeout(url, options = {}, timeout = 5000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
+// ── LIVE WEATHER ─────────────────────────────
+async function fetchWeather(loc){
+  S.fetchingWeather = true; renderMessages();
+  try {
+    let lat=22.3039, lon=70.8022;
+    if(loc.toLowerCase()!=='rajkot'){
+      const gr = await fetchWithTimeout(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(loc)}&count=1&language=en&format=json`, {}, 5000);
+      if(gr.ok){ const gd=await gr.json(); if(gd.results?.length){lat=gd.results[0].latitude;lon=gd.results[0].longitude;} }
+    }
+    const wr = await fetchWithTimeout(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia/Kolkata`, {}, 5000);
+    if(!wr.ok) throw new Error('api fail');
+    const wd=await wr.json(), c=wd.current;
+    const code=c.weather_code;
+    let desc='Partly Cloudy ⛅';
+    if(code===0)desc='Clear Sky ☀️';
+    else if([1,2,3].includes(code))desc='Mainly Clear ⛅';
+    else if([45,48].includes(code))desc='Foggy 🌫️';
+    else if([51,53,55].includes(code))desc='Drizzle 🌦️';
+    else if([61,63,65].includes(code))desc='Rain 🌧️';
+    else if([80,81,82].includes(code))desc='Rain Showers 🌦️';
+    else if([95,96,99].includes(code))desc='Thunderstorm ⛈️';
+    return `🌦️ <b>Live Weather in ${loc}</b> (Open-Meteo API):<br>🌡️ Temp: ${c.temperature_2m}°C &nbsp;|&nbsp; 💧 Humidity: ${c.relative_humidity_2m}% &nbsp;|&nbsp; 💨 Wind: ${c.wind_speed_10m} km/h<br>☁️ Condition: ${desc}`;
+  } catch(e){
+    const fb = MOCK.weather[loc]||MOCK.weather.default;
+    return `🌦️ <b>Weather in ${loc}</b> (fallback):<br>${fb}`;
+  } finally { S.fetchingWeather=false; }
+}
+
+// ── LIVE CROP PRICE (DUMMY) ──────────────────
+// Mandi prices are now fetched directly by Gemini via Google Search
+async function fetchPrice(crop, loc){
+  return '';
+}
+
+// ── TOOL SELECTION ───────────────────────────
+function selectTool(q){
+  const l=q.toLowerCase();
+  if(['weather','rain','temperature','climate','monsoon','barish','rainy','clouds','temp','baarish'].some(w=>l.includes(w)))
+    return {tool:'weather', badge:'weather', badgeText:'🌦️ Weather API (Open-Meteo)'};
+  if(['price','rate','mandi','sell','market','bhav','cost','bhaav'].some(w=>l.includes(w)))
+    return {tool:'price', badge:'crop_price', badgeText:'💰 Mandi Price (Gemini Search)'};
+  if(['scheme','yojana','loan','subsidy','government','sarkar','help','sarkari'].some(w=>l.includes(w)))
+    return {tool:'schemes', badge:'govt_schemes', badgeText:'🏛️ Govt Schemes Tool'};
+  if(['pest','disease','insect','fungus','yellow','dying','attack','keeda','bimari','leaves','blight','rust'].some(w=>l.includes(w)))
+    return {tool:'pest', badge:'pest_advisor', badgeText:'🌱 Pest Advisor Tool'};
+  return {tool:'general', badge:'gemini_only', badgeText:'✨ Gemini AI'};
+}
+
+// ── GEMINI CALL (with retry + fallback models) ──────────
+const FALLBACK_MODELS = ['gemini-2.5-flash','gemini-3.5-flash','gemini-3.1-flash-lite','gemini-2.5-flash-lite','gemini-2.0-flash'];
+
+async function callGeminiWithModel(model, q, systemPrompt){
+  const apiMessages = S.msgs.filter((_,i)=>i>0).slice(-8).map(m=>({
+    role: m.role==='user'?'user':'model',
+    parts:[{text: m.htmlContent.replace(/<[^>]*>/g,'').slice(0,500)}]
+  }));
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${S.apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[...apiMessages,{role:'user',parts:[{text:q}]}],
+        systemInstruction:{parts:[{text:systemPrompt}]},
+        tools:[{google_search:{}}],
+        generationConfig:{maxOutputTokens:2048,temperature:0.7}
+      })
+    }
+  );
+  if(!res.ok){
+    const e = await res.json().catch(()=>({}));
+    const msg = e?.error?.message||`HTTP ${res.status}`;
+    throw new Error(`[${model}] ${msg}`);
+  }
+  const d = await res.json();
+  // Gemini 2.5+ "thinking" models return multiple parts: thought parts + actual response parts
+  // We concatenate all non-thought text parts to get the complete answer
+  const allParts = d.candidates?.[0]?.content?.parts || [];
+  const txt = allParts
+    .filter(p => p.text && !p.thought)  // Skip thinking/reasoning parts, keep only visible text
+    .map(p => p.text)
+    .join('\n');
+  if(!txt) throw new Error(`[${model}] Empty response`);
+  return {text: txt, model};
+}
+
+async function callGemini(q, toolData, systemPrompt){
+  // Try the user's chosen model first, then fallbacks
+  const primary = S.model || 'gemini-2.5-flash';
+  const models = [primary, ...FALLBACK_MODELS.filter(m=>m!==primary)];
+  let lastErr = null;
+  let allQuotaExhausted = true;
+
+  for(const model of models){
+    try {
+      return await callGeminiWithModel(model, q, systemPrompt);
+    } catch(e){
+      lastErr = e;
+      console.warn(`Gemini ${model} failed:`, e.message);
+      const errLower = e.message.toLowerCase();
+      // Don't retry if it's an auth/key issue (same key will fail on all models)
+      if(errLower.includes('api_key_invalid') || errLower.includes('api key not valid') || errLower.includes('permission_denied')){
+        throw new Error(`🔑 Your Gemini API key is invalid or expired. Please update it in Settings (⚙️).\n\nError: ${e.message}`);
+      }
+      // For quota/rate-limit errors: continue to next model (different models have separate quotas)
+      if(errLower.includes('quota') || errLower.includes('rate_limit') || errLower.includes('rate limit') || errLower.includes('429')){
+        continue; // Try next model — each model has its own quota!
+      }
+      // For other errors (503 high demand, etc): also try next model
+      allQuotaExhausted = false;
+      continue;
+    }
+  }
+  // All models failed
+  if(lastErr){
+    const errLower = lastErr.message.toLowerCase();
+    if(errLower.includes('quota') || errLower.includes('rate_limit') || errLower.includes('rate limit') || errLower.includes('429')){
+      throw new Error(`⏱️ Gemini rate limit reached on all models. Wait a minute and try again.\n\nError: ${lastErr.message}`);
+    }
+  }
+  throw lastErr || new Error('All Gemini models failed');
+}
+
+// ── LOCAL SIMULATION ─────────────────────────
+function simulate(q, tool, toolData){
+  const greet=['Namaste','Ram Ram','Jai Kisan'][Math.floor(Math.random()*3)];
+  const g = `<b>${greet} ${S.name||'Farmer friend'}! 🙏</b>`;
+  if(tool==='weather') return `${g} According to the <b>weather tool</b>, here is today's update:<br>${toolData}<br><br>Stay prepared based on this forecast. Jai Kisan! 🌾`;
+  if(tool==='price')   return `${g} I checked the <b>mandi price tool</b> for your crop:<br>${toolData}<br><br>Sell when prices are strong for maximum profit! Jai Kisan! 🌾`;
+  if(tool==='schemes'){
+    const s=MOCK.schemes[Math.floor(Math.random()*MOCK.schemes.length)];
+    return `${g} I found a great <b>government scheme</b> for you:<br><br>📋 <b>${s.name}</b><br>✅ Benefit: ${s.benefit}<br>📝 Apply at: ${s.apply}<br><br>Visit your Gram Panchayat office for assistance. Jai Kisan! 🌾`;
+  }
+  if(tool==='pest'){
+    const advice=MOCK.pest[S.crop]||MOCK.pest.default;
+    return `${g} Based on the <b>pest advisor tool</b> for <b>${S.crop}</b>:<br><br>${advice.map(a=>`• ${a}`).join('<br>')}<br><br>⚠️ For pesticide doses, consult your local Krishi Sevak. Jai Kisan! 🌾`;
+  }
+  return `${g} Thank you for your question! I am here to help you with your <b>${S.crop}</b> farm in <b>${S.loc}</b>.<br><br>You can ask me about 🌦️ weather, 💰 mandi prices, 🏛️ government schemes, or 🌱 crop diseases. Jai Kisan! 🌾`;
+}
+
+// ── SAVE ANALYTICS ───────────────────────────
+function saveAnalytics(key){
+  S.analytics.total++;
+  S.analytics[key]=(S.analytics[key]||0)+1;
+  localStorage.setItem('kai_analytics',JSON.stringify(S.analytics));
+  renderAnalytics();
+}
+
+// ── SEND MESSAGE ─────────────────────────────
+async function sendMsg(text){
+  text = (text||$('chat-input').value).trim();
+  if(!text || S.loading) return;
+  $('chat-input').value='';
+
+  // Safety
+  const warn = safetyCheck(text);
+  if(warn){
+    addMsg('user', escHtml(text));
+    addMsg('ai', warn, 'safety_guardrail','⛔ Safety Block');
+    saveAnalytics('safety_guardrail');
+    return;
+  }
+
+  // User message
+  addMsg('user', escHtml(text));
+  S.loading=true; renderMessages(); updateInputState();
+
+  // History
+  S.history = [text.slice(0,90), ...S.history.filter(h=>h!==text.slice(0,90))].slice(0,5);
+  localStorage.setItem('kai_history', JSON.stringify(S.history));
+  renderHistory();
+
+  // Pick tool + fetch live data
+  const {tool, badge, badgeText} = selectTool(text);
+  let toolData='', toolDataLive=false;
+  try {
+    if(tool==='weather'){
+      toolData = await fetchWeather(S.loc);
+      toolDataLive = !toolData.includes('(fallback)');
+    }
+    if(tool==='price'){
+      toolData = MOCK.prices[S.crop] || MOCK.prices.default;
+      toolDataLive = false;
+    }
+    if(tool==='schemes'){
+      toolData = MOCK.schemes.map(s=>`• <b>${s.name}</b>: ${s.benefit} Apply: ${s.apply}`).join('<br>');
+    }
+    if(tool==='pest'){
+      const advice=MOCK.pest[S.crop]||MOCK.pest.default;
+      toolData = `Pest advice for ${S.crop}:<br>${advice.map(a=>`• ${a}`).join('<br>')}`;
+    }
+  } catch(e){ console.warn('Tool error:',e); }
+
+  // Construct tool context and explicit instruction for Google Search grounding
+  let toolContext = 'No tool data — give general farming advice.';
+  if (tool === 'price') {
+    toolContext = `CRITICAL DIRECTIVE: You MUST use your Google Search tool to search for and retrieve the actual, real-time live mandi price for ${S.crop} in ${S.loc} Mandi (Rajkot APMC or nearby APMCs in Gujarat) for today/this week. Present the actual live prices (modal, minimum, and maximum prices in a structured markdown table) retrieved from your search results to the farmer.`;
+  } else if (tool === 'weather') {
+    if (toolDataLive) {
+      toolContext = `VERIFIED LIVE WEATHER (from Open-Meteo API):
+${toolData.replace(/<[^>]*>/g,'')}`;
+    } else {
+      toolContext = `Weather API returned simulated fallback data:
+${toolData.replace(/<[^>]*>/g,'')}
+
+CRITICAL DIRECTIVE: Since the live Weather API returned simulated fallback data, you MUST use your Google Search tool to search for the actual current weather/temperature/rain forecast in ${S.loc} today. Present the live weather conditions retrieved from your search. Only if the search fails, refer to the fallback simulated weather but clearly state that it is a fallback reference.`;
+    }
+  } else if (toolData) {
+    toolContext = toolData.replace(/<[^>]*>/g,'');
+  }
+
+  // System prompt
+  const systemPrompt =
+`You are KisanAI, a warm, helpful, and highly professional AI assistant for Indian farmers. Speak simply, clearly, and respect the farmer.
+
+FARMER PROFILE:
+- Name: ${S.name||'Farmer friend'}
+- Location: ${S.loc}
+- Crop: ${S.crop}
+- Recent questions: ${S.history.slice(0,3).join('; ')}
+
+TOOL DATA & GROUNDING INSTRUCTIONS:
+${toolContext}
+
+SAFETY RULES:
+- For exact pesticide dose → refer to Krishi Sevak
+- For human health → refer to doctor
+- Always greet warmly ("Jai Kisan", "Namaste")
+- Reply in simple English (or Hindi/Gujarati if asked)
+
+INSTRUCTIONS FOR DETAILED RESPONSES:
+- Provide comprehensive, detailed, and structured farming advice. Do NOT summarize or shorten excessively.
+- Use markdown tables, headers, and bulleted lists to organize information professionally.
+- At the very end of your response, list 2-3 logical follow-up questions or actions as suggestion chips in this exact format:
+[Suggest: Question or action 1]
+[Suggest: Question or action 2]
+[Suggest: Question or action 3]
+Keep these suggestions short, action-oriented, and highly relevant to your response.`;
+
+  // Try Gemini, fallback to simulation
+  let aiHtml='', isSimulated=false, geminiError='', usedModel='', suggestions=[];
+  if(S.apiKey){
+    try {
+      const result = await callGemini(text, toolData, systemPrompt);
+      const parsed = extractSuggestions(result.text);
+      aiHtml = mdToHtml(parsed.cleanText);
+      suggestions = parsed.suggestions;
+      usedModel = result.model;
+    } catch(e){
+      geminiError = e.message;
+      console.error('❌ Gemini Error:', geminiError);
+      aiHtml = simulate(text, tool, toolData);
+      isSimulated = true;
+      // Show error notification
+      aiHtml += `<br><br><div style="background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:12px;color:#c53030">
+        <b>⚠️ Gemini AI Error — Using Simulated Response</b><br>
+        <span style="color:#e53e3e;word-break:break-all">${escHtml(geminiError)}</span><br>
+        <span style="color:#718096">💡 Check your API key in ⚙️ Settings, or click Test to verify.</span>
+      </div>`;
+    }
+  } else {
+    aiHtml = simulate(text, tool, toolData);
+    isSimulated = true;
+    aiHtml += `<br><br><div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:12px;color:#6d4c00">
+      <b>💡 No Gemini API key set</b> — Using simulated responses.<br>
+      Click ⚙️ Settings to enter your key for live AI answers!
+    </div>`;
+  }
+
+  S.loading=false;
+  // Build badge: show model name if Gemini worked, or (Simulated) + error
+  let finalBadgeText;
+  if(!isSimulated){
+    const modelShort = (usedModel||S.model||'gemini-2.5-flash').replace('gemini-','G').replace('-preview-05-20','✨');
+    finalBadgeText = `${badgeText} (${modelShort})`;
+  } else {
+    finalBadgeText = `${badgeText} (Simulated)`;
+  }
+  addMsg('ai', aiHtml, badge, finalBadgeText, suggestions);
+  saveAnalytics(badge.split(' ')[0]||'gemini_only');
+  updateInputState();
+}
+
+// ── INPUT STATE ──────────────────────────────
+function updateInputState(){
+  const inp = $('chat-input');
+  const btn = $('send-btn');
+  inp.disabled = S.loading;
+  btn.disabled = S.loading || !inp.value.trim();
+  // Quick btns
+  document.querySelectorAll('.q-btn').forEach(b=>{ b.disabled=S.loading; });
+}
+
+// ── API BADGE ────────────────────────────────
+function updateApiBadge(){
+  const badge = $('api-status');
+  const modelShort = (S.model||'gemini-2.5-flash').replace('gemini-','').replace('-preview-05-20','✨').replace('-flash','-Flash').replace('-pro','-Pro').replace('-lite','-Lite');
+  if(S.apiKey){
+    badge.className='api-badge on';
+    badge.innerHTML=`<i class="fa-solid fa-bolt"></i> ${modelShort} Active`;
+  } else {
+    badge.className='api-badge';
+    badge.innerHTML='<i class="fa-solid fa-circle-dot"></i> Simulation Mode';
+  }
+}
+
+// ── SIDEBAR PROFILE ──────────────────────────
+function updateSidebar(){
+  $('sb-name').textContent = S.name||'—';
+  $('sb-loc').textContent  = S.loc||'—';
+  $('sb-crop').textContent = S.crop||'—';
+}
+
+// ── SETUP START ──────────────────────────────
+function startApp(){
+  const name = $('inp-name').value.trim();
+  const loc  = $('inp-loc').value.trim()||'Rajkot';
+  const crop = $('inp-crop').value;
+  if(!name){ $('inp-name').focus(); return; }
+  S.name=name; S.loc=loc; S.crop=crop;
+  localStorage.setItem('kai_profile', JSON.stringify({name,loc,crop}));
+  $('setup-screen').classList.add('hidden');
+  updateSidebar(); updateApiBadge(); renderAnalytics();
+  // Welcome message
+  addMsg('ai',
+    `<b>Namaste ${name}! 🙏</b> Welcome to <b>KisanAI</b> — your smart farming partner. May your harvest be bountiful! 🌾<br><br>I'm here to help with your <b>${crop}</b> farm in <b>${loc}</b>.<br><br>Ask me about:<br>• 🌦️ Weather & rain forecast<br>• 💰 Mandi prices for selling<br>• 🏛️ Government subsidies & schemes<br>• 🌱 Crop pests, diseases & advice`,
+    'gemini_only','🌾 KisanAI Welcome'
+  );
+  $('chat-input').focus();
+}
+
+// ── QUICK BUTTONS ────────────────────────────
+const QUICK_Q = {
+  weather: ()=>`What is the weather like today in ${S.loc}?`,
+  price:   ()=>`What is the current mandi price for ${S.crop}?`,
+  schemes: ()=>`What government schemes are available for farmers like me?`,
+  pest:    ()=>`My ${S.crop} crop leaves are turning yellow. What should I do?`
+};
+
+// ── EVENT WIRING ─────────────────────────────
+$('start-btn').addEventListener('click', startApp);
+$('inp-name').addEventListener('keydown', e=>{ if(e.key==='Enter') startApp(); });
+
+$('edit-btn').addEventListener('click', ()=>{ $('setup-screen').classList.remove('hidden'); });
+
+$('settings-btn').addEventListener('click', ()=>{
+  $('api-key-inp').value = S.apiKey;
+  $('model-sel').value    = S.model;
+  $('modal').classList.remove('hidden');
+});
+$('close-modal').addEventListener('click', ()=>$('modal').classList.add('hidden'));
+$('modal').addEventListener('click', e=>{ if(e.target===$('modal')) $('modal').classList.add('hidden'); });
+$('save-api-btn').addEventListener('click', ()=>{
+  S.apiKey = $('api-key-inp').value.trim();
+  S.model  = $('model-sel').value;
+  localStorage.setItem('kai_apikey', S.apiKey);
+  localStorage.setItem('kai_model',  S.model);
+  // Sync to banner inputs if visible
+  if($('banner-gemini-key')) $('banner-gemini-key').value=S.apiKey;
+  updateApiBadge();
+  updateBannerVisibility();
+  $('modal').classList.add('hidden');
+  // Toast
+  const t = document.createElement('div');
+  t.style.cssText='position:fixed;top:14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#2e7d32,#1b5e20);color:#fff;padding:12px 28px;border-radius:24px;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:9999;animation:fadeIn .3s;display:flex;align-items:center;gap:9px';
+  t.innerHTML=`<i class="fa-solid fa-check-circle"></i> Settings saved! ${S.apiKey?'Gemini AI active 🚀':'Simulation mode'}`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+});
+
+$('send-btn').addEventListener('click', ()=>sendMsg());
+$('chat-input').addEventListener('keydown', e=>{ if(e.key==='Enter') sendMsg(); });
+$('chat-input').addEventListener('input', updateInputState);
+
+document.querySelectorAll('.q-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = QUICK_Q[btn.dataset.q];
+    if(q) sendMsg(q());
+  });
+});
+
+$('reset-btn').addEventListener('click', ()=>{
+  if(!confirm('Reset everything? This clears your profile and chat history. API keys will be kept.')) return;
+  ['kai_profile','kai_analytics','kai_history'].forEach(k=>localStorage.removeItem(k));
+  S.msgs=[]; S.history=[]; S.analytics={total:0,weather:0,crop_price:0,govt_schemes:0,pest_advisor:0,safety_guardrail:0,gemini_only:0};
+  S.name=''; S.loc='Rajkot'; S.crop='Cotton';
+  $('setup-screen').classList.remove('hidden');
+  renderMessages(); renderHistory(); renderAnalytics(); updateApiBadge();
+});
+
+// ── BANNER HELPERS ────────────────────────────
+function updateBannerVisibility(){
+  const banner = $('api-banner');
+  const gearBtn = $('settings-btn');
+  const dismissed = localStorage.getItem('kai_banner_dismissed');
+  if(!banner) return;
+  if(!S.apiKey && !dismissed){
+    banner.style.display='';
+    gearBtn.classList.add('pulse-glow');
+    // Pre-fill if already saved
+    $('banner-gemini-key').value = S.apiKey||'';
+  } else {
+    banner.style.display='none';
+    gearBtn.classList.remove('pulse-glow');
+  }
+}
+
+function toggleEye(inputId, btn){
+  const inp = $(inputId);
+  if(!inp) return;
+  const show = inp.type==='password';
+  inp.type = show ? 'text' : 'password';
+  btn.innerHTML = show
+    ? '<i class="fa-solid fa-eye-slash"></i>'
+    : '<i class="fa-solid fa-eye"></i>';
+}
+
+async function testGeminiKey(){
+  const key = $('banner-gemini-key').value.trim();
+  const st  = $('gemini-status');
+  const btn = $('test-gemini-btn');
+  if(!key){ st.className='key-status err'; st.textContent='⚠️ Please enter a key'; st.style.display='inline-block'; return; }
+  st.className='key-status checking'; st.textContent='⏳ Testing…'; st.style.display='inline-block';
+  btn.disabled=true;
+  try{
+    // Always use gemini-2.5-flash for testing the key (most reliable quota)
+    const model = 'gemini-2.5-flash';
+    const res = await fetchWithTimeout(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({contents:[{role:'user',parts:[{text:'Say: Key works!'}]}]})},
+      5000
+    );
+    if(res.ok){ st.className='key-status ok'; st.textContent='✅ Key works! Live AI enabled.'; }
+    else { const e=await res.json().catch(()=>({})); st.className='key-status err'; st.textContent=`❌ ${e?.error?.message||'Invalid key'}`; }
+  }catch(e){ st.className='key-status err'; st.textContent='❌ Network error'; }
+  finally{ btn.disabled=false; }
+}
+
+function applyBannerKeys(){
+  const gKey = $('banner-gemini-key').value.trim();
+  if(!gKey){ alert('Please enter your Gemini API key.'); return; }
+  S.apiKey=gKey; localStorage.setItem('kai_apikey',gKey);
+  // Also sync to settings modal
+  if($('api-key-inp')) $('api-key-inp').value=S.apiKey;
+  updateApiBadge();
+  updateBannerVisibility();
+  // Toast
+  const banner = document.createElement('div');
+  banner.style.cssText='position:fixed;top:14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#2e7d32,#1b5e20);color:#fff;padding:12px 28px;border-radius:24px;font-size:13px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:9999;animation:fadeIn .3s;display:flex;align-items:center;gap:9px';
+  banner.innerHTML=`<i class="fa-solid fa-bolt" style="color:#ffee58"></i> Gemini AI ACTIVE! 🎉`;
+  document.body.appendChild(banner);
+  setTimeout(()=>banner.remove(),4000);
+}
+
+$('dismiss-banner').addEventListener('click', ()=>{
+  localStorage.setItem('kai_banner_dismissed','1');
+  updateBannerVisibility();
+});
+
+// ── LOAD SAVED SESSION ───────────────────────
+(function init(){
+  const profile = localStorage.getItem('kai_profile');
+  if(profile){
+    const p=JSON.parse(profile);
+    S.name=p.name; S.loc=p.loc; S.crop=p.crop;
+    $('setup-screen').classList.add('hidden');
+    updateSidebar(); updateApiBadge(); renderAnalytics();
+    const hist = localStorage.getItem('kai_history');
+    if(hist){ S.history=JSON.parse(hist); renderHistory(); }
+    addMsg('ai',
+      `<b>Welcome back, ${S.name}! 🙏</b> KisanAI is ready for you.<br>Your <b>${S.crop}</b> farm in <b>${S.loc}</b> — how can I help you today? 🌾`,
+      'gemini_only','🌾 KisanAI'
+    );
+    $('chat-input').focus();
+  } else {
+    $('inp-loc').value='Rajkot';
+  }
+  renderAnalytics();
+  updateBannerVisibility();
+})();
+
+// Default Gemini key placeholder (injected by notebook)
+const DEFAULT_GEMINI_KEY = "YOUR_GEMINI_API_KEY_HERE";
+if(DEFAULT_GEMINI_KEY && DEFAULT_GEMINI_KEY !== "YOUR_GEMINI_API_KEY_HERE" && DEFAULT_GEMINI_KEY !== ""){
+  S.apiKey = DEFAULT_GEMINI_KEY;
+  localStorage.setItem('kai_apikey', S.apiKey);
+  
+  // Fix cached model override: only force gemini-3.5-flash if the cached model is unsupported/obsolete
+  const supportedModels = ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+  if (!S.model || !supportedModels.includes(S.model)) {
+    S.model = "gemini-2.5-flash";
+    localStorage.setItem('kai_model', "gemini-2.5-flash");
+  }
+  if($('model-sel')) $('model-sel').value = S.model;
+  
+  updateApiBadge();
+  updateBannerVisibility();
+}
+</script>
+</body>
+</html>
